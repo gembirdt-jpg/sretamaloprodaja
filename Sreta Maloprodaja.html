@@ -1,0 +1,859 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Sreta Maloprodaja</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Rubik:wght@500;700;800&display=swap">
+<style>
+/* Layout: levo radnja odozgo (Sreta, Goca, knjigovođa, Borko, ulaz, magacin, stolice), desno kartica kupca i dugmad. Jedna tema. Svaki lik ima svoju traku za oblačić da se tekstovi ne preklapaju. */
+:root {
+  --bg: #dde5ee; --panel: #f7f9fb; --ink: #1b2733; --muted: #586878; --line: #b4c2d0;
+  --blue: #1c9be6; --orange: #f58220; --green: #26a64a; --green-deep: #17692f; --purple: #5f3dc4;
+  --price: #ffd43b; --good: #1f9d55; --bad: #d62d20;
+  --font-head: "Bowlby One", "Arial Black", Impact, sans-serif;
+  --font-body: "Rubik", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-weight: 500; padding-block: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+header { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+h1 { margin: 0; font-family: var(--font-head); font-weight: 400; font-size: clamp(26px, 6vw, 42px); line-height: 1; text-wrap: balance; }
+h1 span { background: var(--price); padding: 0 .16em; border-radius: 4px; }
+.sub { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
+.hud { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
+.hud div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.hud small { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); font-weight: 700; }
+.hud b { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+.nerves { display: flex; gap: 4px; height: 24px; align-items: center; }
+.nerves i { width: 14px; height: 22px; border-radius: 3px; background: var(--good); border: 2px solid var(--ink); }
+.nerves i.off { background: transparent; border-color: var(--line); }
+.nerves.low i:not(.off) { background: var(--bad); }
+.snaga { width: 110px; height: 14px; border-radius: 7px; border: 2px solid var(--ink); background: var(--panel); overflow: hidden; margin-block: 5px; }
+.snaga > div { height: 100%; width: 100%; background: var(--good); transform-origin: left; }
+.game { display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.stage { position: relative; container-type: inline-size; width: 100%; border: 2px solid var(--ink); border-radius: 14px; overflow: hidden; background: #cfd8e3; }
+.stage svg { display: block; width: 100%; height: auto; }
+.bub { position: absolute; font-size: max(9.5px, 2.2cqw); line-height: 1.25; font-weight: 700; padding: .4em .65em; border-radius: 10px; z-index: 3; overflow-wrap: anywhere; }
+.bub[hidden] { display: none; }
+.bub::after { content: ""; position: absolute; border: 6px solid transparent; }
+.bub.s { left: 5.3%; top: 30.6%; width: 40%; background: var(--orange); color: var(--ink); }
+.bub.s::after { left: 20%; bottom: -6px; border-bottom: 0; border-top-color: var(--orange); }
+.bub.g { left: 53.8%; top: 30.6%; width: 41.2%; background: var(--green-deep); color: #fff; }
+.bub.g::after { left: 58%; top: -6px; border-top: 0; border-bottom-color: var(--green-deep); }
+.bub.k { left: 25%; top: 4.3%; width: 30.6%; background: #e8edf3; color: var(--ink); border: 1.5px solid #8fa1b5; }
+.bub.k::after { left: -6px; top: 28%; border-left: 0; border-right-color: #8fa1b5; }
+.bub.b { left: 66.3%; top: 40.9%; width: 28.7%; background: var(--purple); color: #fff; }
+.bub.b::after { left: 50%; bottom: -6px; border-bottom: 0; border-top-color: var(--purple); }
+.side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card { background: var(--panel); border: 2px solid var(--ink); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; min-height: 150px; }
+.card h2 { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1.3px; color: var(--muted); font-weight: 800; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.req { font-size: 19px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+.quote { font-size: 15px; color: var(--muted); font-style: italic; min-height: 22px; overflow-wrap: anywhere; }
+.meter { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 8px; align-items: center; font-size: 12px; font-weight: 700; color: var(--muted); }
+.bar { height: 9px; border-radius: 5px; background: var(--line); overflow: hidden; }
+.bar > div { height: 100%; width: 100%; transform-origin: left; }
+#cPat { background: var(--price); } #cProg { background: var(--blue); transform: scaleX(0); }
+.none { color: var(--muted); font-size: 15px; }
+.legendMini { display: flex; gap: 6px 12px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
+.legendMini i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.actions button { font-family: var(--font-body); font-weight: 800; font-size: 15px; line-height: 1.15; color: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 11px 8px 9px; cursor: pointer; display: flex; flex-direction: column; gap: 3px; align-items: center; justify-content: center; box-shadow: 0 4px 0 var(--ink); min-width: 0; touch-action: manipulation; text-wrap: balance; text-align: center; }
+.actions button small { font-weight: 500; font-size: 11.5px; opacity: .94; }
+.actions button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.actions button[aria-disabled="true"] { opacity: .5; }
+.actions button:focus-visible { outline: 3px solid var(--price); outline-offset: 3px; }
+#b1 { grid-column: 1 / -1; background: var(--blue); font-size: 22px; padding-block: 15px 12px; }
+#b2 { background: #0b7285; } #b3 { background: #5f3dc4; } #b4 { background: #c2410c; } #b5 { background: var(--green-deep); }
+#b6 { grid-column: 1 / -1; background: #c92a2a; font-size: 17px; animation: pulse 1s ease-in-out infinite; }
+#b4.fresh { animation: pop .5s ease-out 2; }
+@keyframes pop { 50% { transform: scale(1.06); } }
+@keyframes pulse { 50% { box-shadow: 0 4px 0 var(--ink), 0 0 0 5px rgba(201, 42, 42, .35); } }
+.keys { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.keys kbd { font-family: var(--font-body); font-weight: 800; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; color: var(--ink); }
+.overlay { position: absolute; inset: 0; background: rgba(27, 39, 51, .94); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 16px; color: #fff; z-index: 6; overflow: auto; }
+.overlay[hidden] { display: none; }
+.overlay h2 { margin: 0; font-family: var(--font-head); font-weight: 400; font-size: clamp(24px, 7cqw, 38px); color: var(--price); text-wrap: balance; }
+.overlay p { margin: 0; max-width: 46ch; font-size: 14px; line-height: 1.45; }
+.legend { display: grid; gap: 5px; font-size: 13px; text-align: left; max-width: 46ch; line-height: 1.35; }
+.legend b { color: var(--price); }
+.overlay button { font-family: var(--font-head); font-size: 19px; background: var(--price); color: var(--ink); border: 2px solid #000; border-radius: 12px; padding: 11px 24px; cursor: pointer; box-shadow: 0 4px 0 #000; flex: 0 0 auto; }
+.overlay button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+@media (max-width: 820px) {
+  .game { grid-template-columns: minmax(0, 1fr); }
+  .stage { max-width: min(100%, calc(62svh * 0.914)); margin-inline: auto; }
+  .sub { display: none; }
+  .card { min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) { #b4.fresh, #b6 { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Sreta <span>Maloprodaja</span></h1>
+      <p class="sub">Kupci naviru, Goca priča o Bibi, Borko pita veštačku inteligenciju, a knjigovođa se guši u papirima.</p>
+    </div>
+    <div class="hud">
+      <div><small>Poeni</small><b id="score">0</b></div>
+      <div><small>Živci</small><span class="nerves" id="nerves"></span></div>
+      <div><small>Snaga</small><div class="snaga"><div id="energy"></div></div></div>
+    </div>
+  </header>
+
+  <div class="game">
+    <section class="stage" id="stage">
+      <svg id="scene" viewBox="0 0 320 350" role="img" aria-label="Radnja gledana odozgo: Sreta levo, knjigovođa gore levo, Goca gore desno, Borko za stolom desno, ulaz desno dole, magacin dole desno, dve stolice dole">
+        <defs>
+          <pattern id="tiles" width="20" height="20" patternUnits="userSpaceOnUse">
+            <rect width="20" height="20" fill="#f2f4f7"/><path d="M20 0H0V20" fill="none" stroke="#e1e6ec" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="320" height="350" fill="#cfd8e3"/>
+        <g transform="translate(12 12)">
+          <rect x="195" y="325" width="50" height="13" fill="#b9c4d0"/>
+          <rect x="0" y="0" width="295" height="325" fill="url(#tiles)"/>
+          <path d="M80 150 H186 V300" fill="none" stroke="#c3ccd8" stroke-width="1.6" stroke-dasharray="2 5" stroke-linecap="round"/>
+
+          <rect x="170" y="0" width="125" height="87" fill="#e1f4e6" stroke="#1b2733" stroke-width="3"/>
+          <rect x="182" y="54" width="100" height="26" rx="3" fill="#b98a56" stroke="#7a5a30" stroke-width="1.5"/>
+          <g id="toners"></g>
+          <circle cx="233" cy="30" r="13" fill="#9aa5b1"/>
+
+          <rect x="0" y="43" width="117" height="50" fill="#d5dde7" stroke="#1b2733" stroke-width="3"/>
+          <g id="shelfItems"></g>
+
+          <rect x="10" y="6" width="32" height="30" rx="3" fill="#b98a56" stroke="#7a5a30" stroke-width="1.5"/>
+          <g transform="rotate(-8 20 17)"><rect x="14" y="9" width="13" height="17" fill="#fff" stroke="#b4c2d0" stroke-width=".8"/><path d="M16.5 13H24.5M16.5 16H24.5M16.5 19H22" stroke="#c3ccd8" stroke-width=".8"/></g>
+          <g transform="rotate(7 30 20)"><rect x="24" y="12" width="13" height="17" fill="#fff" stroke="#b4c2d0" stroke-width=".8"/><path d="M26.5 16H34.5M26.5 19H34.5M26.5 22H32" stroke="#c3ccd8" stroke-width=".8"/></g>
+          <rect x="13" y="22" width="12" height="11" fill="#f8f4e3" stroke="#b4c2d0" stroke-width=".8" transform="rotate(3 19 27)"/>
+
+          <rect x="5" y="165" width="80" height="75" fill="#b98a56" stroke="#1b2733" stroke-width="3"/>
+          <rect x="11" y="171" width="68" height="63" fill="#c79a66"/>
+          <rect x="16" y="177" width="24" height="15" rx="2" fill="#2b2f36"/>
+          <rect x="19" y="180" width="18" height="6" fill="#7fd1a0"/>
+          <text x="45" y="226" font-size="8" font-weight="800" fill="#7a5a30" font-family="Rubik, Arial, sans-serif" letter-spacing="1">PULT</text>
+          <rect x="20" y="266" width="30" height="22" fill="#d9b98a" stroke="#8a6a3a" stroke-width="1.5"/>
+          <path d="M35 266 V288" stroke="#8a6a3a" stroke-width="1.2"/>
+
+          <rect x="108" y="295" width="27" height="30" rx="5" fill="#1c9be6" stroke="#0b6aa3" stroke-width="2"/>
+          <rect x="108" y="319" width="27" height="6" rx="2" fill="#0b6aa3"/>
+          <rect x="141" y="295" width="27" height="30" rx="5" fill="#1c9be6" stroke="#0b6aa3" stroke-width="2"/>
+          <rect x="141" y="319" width="27" height="6" rx="2" fill="#0b6aa3"/>
+
+          <rect x="257" y="235" width="43" height="60" rx="3" fill="#1c9be6" stroke="#0b6aa3" stroke-width="2"/>
+          <rect x="262" y="240" width="33" height="50" rx="2" fill="#5ab8ee"/>
+          <text x="278.5" y="268" text-anchor="middle" font-size="8" font-weight="800" fill="#0b4f7a" font-family="Rubik, Arial, sans-serif" letter-spacing="1">ULAZ</text>
+
+          <rect x="195" y="306" width="50" height="19" rx="2" fill="#f0c14b" stroke="#a8741a" stroke-width="1.5"/>
+          <text x="220" y="319" text-anchor="middle" font-size="7.5" font-weight="800" fill="#7a4f08" font-family="Rubik, Arial, sans-serif" letter-spacing=".8">MAGACIN</text>
+
+          <rect x="201" y="165" width="83" height="36" rx="3" fill="#b98a56" stroke="#7a5a30" stroke-width="1.5"/>
+          <rect x="206" y="170" width="73" height="26" rx="2" fill="#c79a66"/>
+          <rect x="224" y="172" width="32" height="20" rx="2" fill="#2b2f36"/>
+          <circle id="lapGlow" cx="240" cy="182" r="6" fill="#7ec8ff"/>
+          <text x="240" y="184.6" text-anchor="middle" font-size="7" font-weight="800" fill="#1b2733" font-family="Rubik, Arial, sans-serif">AI</text>
+          <circle cx="270" cy="184" r="4" fill="#fff" stroke="#8a99a8" stroke-width="1"/>
+          <rect x="209" y="176" width="12" height="10" fill="#d9b98a" stroke="#8a6a3a" stroke-width="1"/>
+          <circle cx="240" cy="216" r="13" fill="#9aa5b1"/>
+
+          <path d="M295 235 V0 H0 V325 H195 M245 325 H295 V295" fill="none" stroke="#1b2733" stroke-width="5" stroke-linejoin="miter"/>
+
+          <g id="gPeople"></g>
+
+          <g id="knjigG" transform="translate(52 25)">
+            <g id="knjigRot" transform="rotate(180)">
+              <ellipse rx="6" ry="12" fill="#9fb3c8" stroke="#6b7f95" stroke-width="1.2"/>
+              <circle r="7.4" fill="#f3f3f3" stroke="#c9ced4" stroke-width=".8"/>
+              <circle cx="2.8" r="5" fill="#f3d2b8"/>
+              <g fill="rgba(255,255,255,.55)" stroke="#2b2f36" stroke-width="1"><circle cx="6.4" cy="-2.7" r="2"/><circle cx="6.4" cy="2.7" r="2"/></g>
+              <path d="M6.4 -.7 V.7" stroke="#2b2f36" stroke-width="1"/>
+            </g>
+          </g>
+          <g id="papers">
+            <g class="pp"><rect x="-4" y="-5" width="8" height="10" fill="#fff" stroke="#b4c2d0" stroke-width=".7"/></g>
+            <g class="pp"><rect x="-4" y="-5" width="8" height="10" fill="#fff" stroke="#b4c2d0" stroke-width=".7"/></g>
+            <g class="pp"><rect x="-4" y="-5" width="8" height="10" fill="#fff" stroke="#b4c2d0" stroke-width=".7"/></g>
+            <g class="pp"><rect x="-4" y="-5" width="8" height="10" fill="#fff" stroke="#b4c2d0" stroke-width=".7"/></g>
+          </g>
+
+          <g id="gocaG" transform="translate(233 30)">
+            <circle id="gocaRing" r="14" fill="none" stroke="#26a64a" stroke-width="2" opacity="0"/>
+            <g transform="rotate(90)">
+              <ellipse rx="6" ry="12.5" fill="#26a64a" stroke="#17782f" stroke-width="1.2"/>
+              <circle cx="-9.5" cy="0" r="5.2" fill="#c9ced4" stroke="#9aa0a8" stroke-width=".8"/>
+              <circle cx="0" cy="0" r="7" fill="#c9ced4"/>
+              <circle cx="1.8" cy="0" r="6" fill="#efc09b"/>
+              <path d="M5.2 -4 A1 1 0 0 1 5.2 -2 M5.2 2 A1 1 0 0 1 5.2 4" stroke="#4a4f57" stroke-width="1.1" fill="none"/>
+              <circle cx="7.4" cy="0" r="1.4" fill="#dfa77f"/>
+            </g>
+            <circle id="gocaHit" r="24" fill="transparent" style="cursor:pointer"/>
+          </g>
+
+          <g id="borkoG" transform="translate(240 216)">
+            <g id="borkoRot" transform="rotate(270)">
+              <ellipse rx="6" ry="12.5" fill="#6741d9" stroke="#432a96" stroke-width="1.2"/>
+              <circle cx="0" cy="-7.4" r="1.6" fill="#d9a077"/><circle cx="0" cy="7.4" r="1.6" fill="#d9a077"/>
+              <circle r="7" fill="#e7b48c" stroke="#c98b5f" stroke-width=".8"/>
+              <ellipse cx="-1" cy="-2.4" rx="3.2" ry="1.7" fill="rgba(255,255,255,.6)"/>
+              <circle cx="7.2" cy="0" r="1.3" fill="rgba(0,0,0,.2)"/>
+              <g id="borkoBox" display="none"><rect x="8" y="-6" width="12" height="12" rx="1" fill="#d9b98a" stroke="#8a6a3a" stroke-width="1"/><path d="M14 -6 V6" stroke="#8a6a3a" stroke-width="1"/></g>
+            </g>
+          </g>
+
+          <g id="sretaG" transform="translate(33 150)">
+            <ellipse cx="0" cy="3" rx="13" ry="10" fill="rgba(0,0,0,.14)"/>
+            <ellipse rx="6" ry="12.5" fill="#f58220" stroke="#b35a0e" stroke-width="1.2"/>
+            <circle cx="0" cy="0" r="7" fill="#2d1f16"/>
+            <circle cx="1.8" cy="0" r="6" fill="#e7b48c"/>
+            <circle cx="7.4" cy="0" r="1.4" fill="#d29a74"/>
+            <g id="tin" display="none">
+              <circle cx="12" cy="9" r="5.5" id="tinFill" fill="#e8b94f" stroke="#7a5a1d" stroke-width="1.2"/>
+              <circle cx="12" cy="9" r="2.6" fill="rgba(255,255,255,.35)"/>
+            </g>
+          </g>
+          <g id="gFloats"></g>
+        </g>
+      </svg>
+      <div class="bub k" id="kBubble" hidden></div>
+      <div class="bub s" id="sBubble" hidden></div>
+      <div class="bub g" id="gBubble" hidden></div>
+      <div class="bub b" id="bBubble" hidden></div>
+
+      <div class="overlay" id="overlay">
+        <h2 id="ovTitle">Sreta Maloprodaja</h2>
+        <p id="ovText">Kupci ulaze na vrata i staju u red ispred Srete. Uslužuj prvog, kupuj vreme izgovorima i pazi na snagu.</p>
+        <div class="legend" id="ovLegend">
+          <span><b>Usluži:</b> kucaj dok se traka usluge ne napuni.</span>
+          <span><b>Moraćete da sačekate:</b> kupac sedne na stolicu na 6 sekundi. Ljuti neće hteti.</span>
+          <span><b>I vi ćete morati da sačekate:</b> ceo red stane na 4 sekunde.</span>
+          <span><b>Goca</b> priča o Bibi i tonerima i usporava te, osim kad kupac traži toner.</span>
+          <span><b>Borko</b> pita veštačku inteligenciju i ponekad pomogne, ali stalno trči u magacin (dole desno).</span>
+          <span>Posle 4 uslužena kupca Sreta nađe hranu. Tu i tamo se pojavi vanredno dugme.</span>
+        </div>
+        <button id="startBtn" type="button">Otvori radnju</button>
+      </div>
+    </section>
+
+    <aside class="side">
+      <div class="card" aria-live="off">
+        <h2><span>Na šalteru</span><span id="qInfo">Red 0 / 8 &middot; stolice 0 / 2</span></h2>
+        <div id="cardFull">
+          <div class="req" id="cReq"></div>
+          <div class="quote" id="cQuote"></div>
+          <div class="meter"><span>Strpljenje</span><div class="bar"><div id="cPat"></div></div></div>
+          <div class="meter"><span>Usluga</span><div class="bar"><div id="cProg"></div></div></div>
+        </div>
+        <div class="none" id="cNone" hidden>Nikoga nema na šalteru.</div>
+        <div class="legendMini"><span><i style="background:var(--orange)"></i>Sreta</span><span><i style="background:var(--green)"></i>Goca</span><span><i style="background:#6741d9"></i>Borko</span><span><i style="background:#9fb3c8"></i>knjigovođa</span><span><i style="background:var(--blue)"></i>ulaz, stolice</span><span><i style="background:#f0c14b"></i>magacin</span></div>
+      </div>
+      <div class="actions" id="actions">
+        <button id="b1" type="button">Usluži<small>Space ili 1</small></button>
+        <button id="b2" type="button"><span>Moraćete da sačekate</span><small id="c2">taster 2</small></button>
+        <button id="b3" type="button"><span>I vi ćete morati da sačekate</span><small id="c3">taster 3</small></button>
+        <button id="b4" type="button" hidden><span id="l4">Otvori pastetu</span><small id="c4">taster 4</small></button>
+        <button id="b5" type="button"><span>Goca, posle</span><small id="c5">taster 5</small></button>
+        <button id="b6" type="button" hidden><span id="l6">Vanredno</span><small id="c6">taster 6</small></button>
+      </div>
+      <p class="keys">Tasteri: <kbd>Space</kbd> ili <kbd>1</kbd> usluži, <kbd>2</kbd> stolica, <kbd>3</kbd> svi čekaju, <kbd>4</kbd> hrana, <kbd>5</kbd> utišaj Gocu (ili klikni na nju), <kbd>6</kbd> vanredno dugme. Pet ljutih kupaca ili prazan stomak i smena je gotova.</p>
+    </aside>
+  </div>
+</div>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const MAXQ = 8, GAP = 30, DOOR = [314, 265], CH = [[121.5, 308], [154.5, 308]];
+  const BDESK = [240, 216], BMAG = [220, 334];
+  function slotPos(i) {
+    const s = Math.min(i * GAP, 256);
+    return s <= 106 ? [80 + s, 150] : [186, 150 + (s - 106)];
+  }
+
+  const REQS = [
+    { t: 'USB kabl za telefon', n: 3 }, { t: 'Punjač za laptop', n: 4 },
+    { t: 'Toner za HP 1102', n: 5, toner: true }, { t: 'Miš koji ne klikće', n: 3 },
+    { t: 'Reklamacija na slušalice', n: 6 }, { t: 'Račun za ono što nisam kupio', n: 5 },
+    { t: 'Toner, ali ne znam koji', n: 6, toner: true }, { t: 'Gde je toalet?', n: 2 },
+    { t: 'Mastilo za štampač', n: 4 }, { t: 'Hoću da vratim, nemam kutiju', n: 6 },
+    { t: 'Samo pitam nešto', n: 3 }, { t: 'Kese, molim', n: 2 },
+    { t: 'Toner za stari štampač', n: 5, toner: true }, { t: 'Baterije, one male', n: 2 },
+    { t: 'Onaj kabl, znate već', n: 4 }, { t: 'A imate li ono?', n: 4 }, { t: 'Znate onaj kabl od prošli put', n: 5 },
+    { t: 'Onaj konektor što ide u ono', n: 4 }, { t: 'Antena za TV, ona sobna', n: 5 },
+    { t: 'Kabl, ali ne znam koji', n: 4 }, { t: 'Konektor, jedan mali, crni', n: 3 },
+    { t: 'Nešto za televizor, mislim antena', n: 5 }, { t: 'Ono što se ubacuje u ono', n: 4 },
+    { t: 'Antena, ali jača', n: 5 }, { t: 'Dva konektora, ali ne ista', n: 4 },
+    { t: 'Kabl da stigne do ugla', n: 4 }, { t: 'Razdelnik za antenu, valjda', n: 5 }
+  ];
+  const CLINES = ['Imate li onaj kabl?', 'Znate onaj kabl?', 'A imate li ono?', 'Imate li antenu za TV?', 'Treba mi konektor, onaj mali.',
+    'Kabl, ali dugačak, znate.', 'Ono za televizor, vi znate.', 'Antena, ali da hvata sve.', 'Ima li koga?', 'Ja sam bio prvi!',
+    'Dugo čekam!', 'Pozvaću šefa!', 'Brzo, žurim!', 'Ovo je neozbiljno!', 'Pa gde je on?'];
+  const ANGRY = ['Neću da čekam!', 'Ovo je bruka!', 'Idem kod konkurencije!', 'Čekam od jutros!', 'Hoću knjigu žalbi!', 'Pozvaću inspekciju!', 'Pa ko je ovde prodavac?!', 'Ja ovde ne ostajem!'];
+  const LEAVE = ['Odoh kod drugih!', 'Nikad više ovde!', 'Ocena jedan!', 'Ovo je sramota!'];
+
+  const GLINES = [
+    'A toneri, toneri... znate li vi da toner nije mastilo?', 'Kad sam ja radila sa tonerima, drugačije je to bilo.',
+    'Za HP 1102 se uzima drugi toner nego za 1106, mili.', 'Samo da vam kažem o tonerima, ne dugo.',
+    'Toner se ne trese! Ko trese toner, taj nema pojma.', 'A šta ćete sa onim starim tonerom? Dajte meni.',
+    'Toneri su nekad bili bolji, ja vam kažem.', 'Moja Biba, moja Biba...', 'Moja Biba voli more, a more voli Bibu.',
+    'Znaš ti da je moja Biba bila na moru?', 'Išla sam na Adu da vozim bicikl.', 'Išla sam na Adu da se kupam.',
+    'Biba je na moru jela samo grčku salatu. Zdrav život, mili.', 'More leči i leđa i živce. Toner ne leči ništa.',
+    'Na Adi sam prošla pet krugova. Zdrav život, zdrav život!', 'Svako jutro čaša mlake vode sa limunom. Tako se živi.',
+    'Ada je bila puna sveta, ali ja sam ipak uzela bicikl.', 'Biba kaže da je more kao toner: samo da se ne prospe.',
+    'Ne jedi posle osam uveče. Ja jedem samo do osam i petnaest.', 'Šetnja posle ručka, to ti je zdravlje.',
+    'Moja Biba se kupala do oktobra, a ja do septembra.', 'Prvo more, pa Ada, pa tek onda toneri. Tako je zdravo.',
+    'Biba mi kaže: Goco, ne pij hladno. I ne pijem.', 'Hodaj bosa po travi, mili, to vadi sve iz čoveka.',
+    ['Ima li ovaj toner čip?', 'Japanski prah.'], ['Ima li ovaj toner čip, mili?', 'Japanski prah...']
+  ];
+  const GSHUT = ['Dobro, dobro. Ali toneri su važni.', 'Ja samo kažem...', 'Pa ništa, pričaću posle o Bibi.'];
+
+  const KLINES = ['Pusti me ga, ženo božija!', 'Pusti me ga, ženo božija!', 'Gde mi je onaj papir?', 'Gde mi je onaj papir?',
+    'Ovo je za prošlu godinu ili za ovu?', 'Faktura bez broja! Ko ovo piše?', 'Razlika je 0,02 dinara, ne mogu da spavam.',
+    'Kha, kha... prašina od papira.', 'Ko je opet pomešao uplatnice?', 'Pečat! Ko je video pečat?',
+    'Pa nije ovo moj papir, to je tvoj!', 'Zatvaram mesec, ne prilazite.'];
+  const BAI_START = ['Pitam veštačku inteligenciju...', 'Samo da ubacim u AI...', 'Evo, pišem prompt...'];
+  const BAI_OK = ['AI kaže: kabl je tu! Rešeno.', 'AI je rešio, ja samo kopiram.', 'Rešeno. AI je pametniji od mene.'];
+  const BAI_MEH = ['AI kaže: isključi pa uključi.', 'AI traži da pojasnim zahtev.', 'AI se zamislio...'];
+  const BAI_BAD = ['AI je izmislio proizvod koji ne postoji.', 'AI je odgovorio na pogrešnom jeziku.'];
+  const BTRIP = ['Moram do magacina!', 'Ponestalo kablova, trčim!', 'AI ne zna gde je kutija, idem u magacin.', 'Magacin zove!'];
+
+  const SIDLE = ['Antene? Ovde hvatamo samo šefa.', 'Konektor je konektor, ko ga ne razume nek ne dira.', 'Imamo sve, samo ne znamo gde.',
+    'Kabl nije kriv što ste ga vi presavili.', 'Ko čeka, taj dočeka. Ko ne čeka, taj viče.', 'Ne, ne znam koji kabl. Ni vi.',
+    'Kad je antena u pitanju, uvek je do vremena.', 'Danas smo samo za pozdrav i kablove.', 'Šta je ono što ide u ono? Ništa ne ide u ništa.'];
+  const SSTRESS = ['Jao, Klintone, koliko vas ima!', 'Ne mogu više, ljudi!', 'Ko vas je sve zvao?!', 'Jao, Klintone!', 'Jedan po jedan, nije bioskop!'];
+  const SHUNGRY = ['Gde mi je onaj pekmez?', 'Burek bi mi sad dobro došao...', 'Nešto bi da jedem.', 'Čajna, čajna, gde si?'];
+  const SDONE = ['Izvolite, sledeći!', 'Gotovo. Hvala na strpljenju.', 'Imate račun. Slobodno.', 'Eto, antena je tu. Skoro.', 'Ovo vam je 100% konektor.'];
+  const SWAIT = ['Moraćete da sačekate.', 'Moraćete da sačekate.', 'Moraćete da sačekate.', 'Sedite, kao na pošti.'];
+  const SWAIT2 = ['I vi ćete morati da sačekate.', 'I vi ćete morati da sačekate.', 'I svi ostali ćete sačekati.'];
+
+  const FOODS = [
+    { btn: 'Otvori pastetu', start: 'Kako ću da je slistim?', end: 'Mmm, pašteta.', dur: 3, en: 40, col: '#e8b94f' },
+    { btn: 'Nareži čajnu', start: 'Čajna, hleb i mir.', end: 'Čajna je spasila dan.', dur: 3, en: 38, col: '#e07a7a' },
+    { btn: 'Gde mi je onaj pekmez?', start: 'Gde mi je onaj pekmez?!', end: 'Našao sam ga! Bio je iza tonera.', dur: 4, en: 45, col: '#a61e4d' },
+    { btn: 'Podgrej sarmu', start: 'Sarma, kao kod bake.', end: 'Sad mogu do sutra.', dur: 5, en: 60, col: '#7a8f3a' }
+  ];
+  const SPECIALS = {
+    bolovanje: { label: 'Otvori bolovanje', ok: () => S.queue.length >= 5, w: 2 },
+    magacin: { label: 'Odoh ja u magacin', ok: () => S.queue.length >= 1, w: 2 },
+    nemogu: { label: 'Ne mogu više!', ok: () => S.nerves <= 3 || S.queue.length >= 4, w: 2 },
+    klintone: { label: 'Jao, Klintone!', ok: () => S.queue.length >= 1, w: 1.5 }
+  };
+  const SKIN = ['#f0c19c', '#e0a77d', '#c98b5f', '#f7d3b5'];
+  const HAIR = ['#2d1f16', '#6b4423', '#c9a24b', '#8a8a8a', '#b5412c'];
+  const SHIRT = ['#7048e8', '#0c8599', '#d6336c', '#5c7cfa', '#868e96', '#364fc7', '#a61e4d', '#495057'];
+
+  const el = {
+    score: $('score'), nerves: $('nerves'), energy: $('energy'), tin: $('tin'), tinFill: $('tinFill'), sretaG: $('sretaG'),
+    gocaRing: $('gocaRing'), gocaHit: $('gocaHit'), gPeople: $('gPeople'), gFloats: $('gFloats'),
+    borkoG: $('borkoG'), borkoRot: $('borkoRot'), borkoBox: $('borkoBox'), knjigRot: $('knjigRot'), lapGlow: $('lapGlow'),
+    overlay: $('overlay'), ovTitle: $('ovTitle'), ovText: $('ovText'), ovLegend: $('ovLegend'), start: $('startBtn'),
+    qInfo: $('qInfo'), cardFull: $('cardFull'), cNone: $('cNone'), cReq: $('cReq'), cQuote: $('cQuote'), cPat: $('cPat'), cProg: $('cProg'),
+    b1: $('b1'), b2: $('b2'), b3: $('b3'), b4: $('b4'), b5: $('b5'), b6: $('b6'),
+    c2: $('c2'), c3: $('c3'), c4: $('c4'), c5: $('c5'), c6: $('c6'), l4: $('l4'), l6: $('l6')
+  };
+  const bub = { s: $('sBubble'), g: $('gBubble'), k: $('kBubble'), b: $('bBubble') };
+  const bt = { s: 0, g: 0, k: 0, b: 0 };
+  const papers = Array.from(document.querySelectorAll('#papers .pp'));
+
+  (function decor() {
+    const cols = ['#1c9be6', '#ffd43b', '#8a99a8', '#d6336c', '#5c7cfa'];
+    let h = '';
+    for (let r = 0; r < 2; r++) for (let i = 0; i < 9; i++)
+      h += '<rect x="' + (6 + i * 12) + '" y="' + (50 + r * 22) + '" width="9" height="14" rx="1.5" fill="' + cols[(i + r * 2) % cols.length] + '" stroke="rgba(0,0,0,.25)" stroke-width=".8"/>';
+    $('shelfItems').innerHTML = h;
+    let t = '';
+    for (let i = 0; i < 4; i++)
+      t += '<rect x="' + (190 + i * 22) + '" y="58" width="16" height="11" rx="2" fill="#2b2f36"/><rect x="' + (193 + i * 22) + '" y="61" width="10" height="4" fill="#ffd43b"/>';
+    $('toners').innerHTML = t;
+  })();
+
+  let best = 0;
+  try { best = parseInt(localStorage.getItem('sreta-best') || '0', 10) || 0; } catch (e) {}
+  let uid = 0, last = performance.now(), shownNerves = -1;
+  const S = {}, B = {};
+  const nodes = new Map();
+
+  const pickFood = prev => { let i; do { i = Math.floor(Math.random() * FOODS.length); } while (i === prev); return i; };
+
+  function init(phase) {
+    for (const n of nodes.values()) n.g.remove();
+    nodes.clear();
+    if (S.floats) for (const f of S.floats) f.el.remove();
+    Object.assign(S, { phase, time: 0, score: 0, nerves: 5, energy: 100, food: pickFood(-1), stock: 3, stockT: 0, foodOn: false,
+      people: [], queue: [], chairs: [null, null], pend: [], floats: [], tapT: 0, spawnT: 1, waveT: rand(26, 34),
+      eating: 0, eatFood: null, served: 0, streak: 0, cdFront: 0, cdAll: 0, freezeAll: 0, away: 0, awayRes: false,
+      sp: null, spNext: rand(16, 22), sIdle: rand(6, 9), kNext: rand(3, 6), gNext: rand(5, 9), gTalk: 0, gCool: 0, gFollow: null, gFollowT: 0 });
+    Object.assign(B, { state: 'desk', x: BDESK[0], y: BDESK[1], ang: 270, t: 0, box: false, aiT: rand(5, 8), tripT: rand(12, 18), pending: null });
+    for (const w in bub) { bub[w].hidden = true; bt[w] = 0; }
+    el.b4.hidden = true; el.b4.classList.remove('fresh'); el.b6.hidden = true;
+    shownNerves = -1;
+  }
+
+  function say(who, text, dur) {
+    if (who === 'b' && bt.g > 0) return false;
+    if (who === 'g' && bt.b > 0) { bt.b = 0; bub.b.hidden = true; }
+    bub[who].textContent = text; bub[who].hidden = false; bt[who] = dur || 2.6;
+    return true;
+  }
+  const sayS = (t, d) => say('s', t, d || 2.4);
+  const sayG = (t, d) => say('g', t, d || 4);
+
+  function addCustomer(demoIndex) {
+    const r = pick(REQS), max = Math.max(11, 21 - S.time * 0.06);
+    const c = { id: ++uid, req: r.t, n: r.n, toner: !!r.toner, prog: 0, pat: max, max, freeze: 0, say: pick(CLINES),
+      skin: pick(SKIN), hair: pick(HAIR), shirt: pick(SHIRT), x: DOOR[0], y: DOOR[1] + rand(-8, 8), ang: 180, dist: 999,
+      state: 'queue', chair: -1, angry: false, angerT: rand(1, 3) };
+    if (demoIndex !== undefined) { const p = slotPos(demoIndex); c.x = p[0]; c.y = p[1]; c.dist = 0; }
+    S.queue.push(c); S.people.push(c);
+    return c;
+  }
+
+  function spawn() {
+    if (S.queue.length >= MAXQ) { S.nerves--; S.streak = 0; sayS('Jao, Klintone! Rep izlazi na ulicu!', 2.6); return; }
+    addCustomer();
+  }
+
+  function mkText(txt, col, size) {
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('text-anchor', 'middle'); t.setAttribute('font-size', size); t.setAttribute('font-weight', '800');
+    t.setAttribute('font-family', 'Rubik, Arial, sans-serif'); t.setAttribute('fill', col);
+    t.setAttribute('stroke', '#fff'); t.setAttribute('stroke-width', '3'); t.setAttribute('paint-order', 'stroke');
+    t.textContent = txt; el.gFloats.appendChild(t);
+    return t;
+  }
+  function addFloat(x, y, txt, col) { S.floats.push({ x, y, t: 0, life: 1.1, el: mkText(txt, col, 11), follow: null }); }
+  function shout(c, txt) {
+    c.say = txt;
+    if (S.floats.filter(f => f.follow).length >= 2) return;
+    S.floats.push({ x: c.x, y: c.y + 22, t: 0, life: 2.4, el: mkText(txt, '#d62d20', 9.5), follow: c });
+  }
+
+  function finish(c, happy) {
+    const i = S.queue.indexOf(c); if (i >= 0) S.queue.splice(i, 1);
+    c.state = 'leave'; c.angry = !happy;
+  }
+
+  function tryComplete(c) {
+    if (c.prog < c.n || S.queue.indexOf(c) < 0) return false;
+    const pts = 10 + c.n * 2 + Math.min(S.streak + 1, 10);
+    finish(c, true); S.streak++; S.served++; S.score += pts;
+    addFloat(c.x, c.y + 20, '+' + pts, '#1f9d55');
+    if (!S.foodOn && S.served >= 4) {
+      S.foodOn = true; el.b4.hidden = false; el.b4.classList.add('fresh');
+      sayS('Našao sam nešto za pod zub u fioci!', 2.8);
+    } else if (S.served % 8 === 0 && S.nerves < 5) { S.nerves++; sayS('Pohvala od šefa! Živci se smiruju.', 2.6); }
+    else sayS(pick(SDONE), 1.8);
+    return true;
+  }
+
+  function serve() {
+    if (S.phase !== 'play' || S.eating > 0 || S.away > 0 || !S.queue.length) return;
+    const c = S.queue[0];
+    if (c.dist > 34) return;
+    let gain = 1;
+    if (S.gTalk > 0) gain = c.toner ? 1.6 : 0.5;
+    c.prog += gain; S.tapT = 0.12;
+    if (c.toner && S.gTalk > 0 && Math.random() < 0.12) sayG('Ja znam taj toner, mili!', 2.2);
+    tryComplete(c);
+  }
+
+  function freeChair() { return S.chairs[0] ? (S.chairs[1] ? -1 : 1) : 0; }
+
+  function waitFront() {
+    if (S.phase !== 'play' || S.cdFront > 0 || !S.queue.length) return;
+    const k = freeChair();
+    if (k < 0) { sayS('Stolice su zauzete!', 1.6); return; }
+    const c = S.queue[0];
+    S.cdFront = 3;
+    if (c.pat / c.max < 0.45 && Math.random() < 0.4) {
+      shout(c, 'Neću da čekam!'); c.pat = Math.max(0.5, c.pat - 3);
+      sayS('Dobro, dobro, stojte kad vam je lakše.', 2.2);
+      return;
+    }
+    S.queue.shift();
+    c.state = 'chair'; c.chair = k; c.say = 'Ma kako to mislite?!';
+    S.chairs[k] = { c, t: 6 };
+    sayS(pick(SWAIT), 2.3);
+  }
+
+  function waitAll() {
+    if (S.phase !== 'play' || S.cdAll > 0 || !S.queue.length) return;
+    S.freezeAll = 4; S.cdAll = 14;
+    sayS(pick(SWAIT2), 2.5);
+  }
+
+  function eat() {
+    if (S.phase !== 'play' || !S.foodOn || S.eating > 0 || S.away > 0 || S.stock <= 0) return;
+    const f = FOODS[S.food];
+    S.stock--; S.eating = f.dur; S.eatFood = f; sayS(f.start, f.dur);
+  }
+
+  function silence() {
+    if (S.phase !== 'play' || S.gTalk <= 0 || S.gCool > 0) return;
+    S.gTalk = 0; S.gCool = 5; S.gNext = rand(9, 14); S.gFollow = null;
+    sayG(pick(GSHUT), 2.4);
+  }
+
+  function dismiss(c) {
+    const i = S.queue.indexOf(c); if (i >= 0) S.queue.splice(i, 1);
+    c.state = 'leave'; c.angry = false;
+  }
+
+  function useSpecial() {
+    if (S.phase !== 'play' || !S.sp) return;
+    const id = S.sp.id; S.sp = null; el.b6.hidden = true; S.spNext = rand(22, 32);
+    if (id === 'bolovanje') {
+      for (const c of S.queue.slice()) dismiss(c);
+      S.pend = []; S.spawnT = Math.max(S.spawnT, 6); S.waveT = Math.max(S.waveT, 14);
+      S.score = Math.max(0, S.score - 20);
+      sayS('Ne mogu više, otvaram bolovanje!', 3);
+    } else if (id === 'magacin') {
+      S.away = 5; S.freezeAll = 5; S.awayRes = Math.random() < 0.6;
+      sayS('Odoh ja u magacin.', 2.4);
+    } else if (id === 'nemogu') {
+      S.energy = Math.max(5, S.energy - 10);
+      for (const c of S.queue) c.pat = Math.min(c.max, c.pat + 4);
+      if (S.queue[0]) S.queue[0].say = 'Pa dobro, dobro, ne plačite.';
+      sayS('Ne mogu više, ljudi!', 2.6);
+    } else if (id === 'klintone') {
+      S.freezeAll = 4;
+      if (S.queue[0]) { S.queue[0].prog += 1; tryComplete(S.queue[0]); }
+      sayS('Jao, Klintone!', 2.4);
+    }
+  }
+
+  function gameOver(why) {
+    S.phase = 'over'; el.b6.hidden = true; S.sp = null;
+    if (S.score > best) { best = S.score; try { localStorage.setItem('sreta-best', String(best)); } catch (e) {} }
+    const rank = S.score < 150 ? 'Pripravnik na kasi' : S.score < 400 ? 'Prodavac' : S.score < 800 ? 'Šef radnje' : 'Legenda maloprodaje';
+    el.ovTitle.textContent = 'Radnja zatvorena';
+    el.ovText.textContent = why + ' Poeni: ' + S.score + '. Uslužio si ' + S.served + ' kupaca. Rekord: ' + best + '. Čin: ' + rank + '.';
+    el.ovLegend.hidden = true; el.start.textContent = 'Nova smena';
+    el.overlay.hidden = false; el.start.focus({ preventScroll: true });
+  }
+
+  function movePerson(p, dt) {
+    let t;
+    if (p.state === 'queue') t = slotPos(S.queue.indexOf(p));
+    else if (p.state === 'chair') t = CH[p.chair];
+    else t = DOOR;
+    const dx = t[0] - p.x, dy = t[1] - p.y, d = Math.hypot(dx, dy);
+    p.dist = d;
+    if (d > 0.4) { const st = Math.min(d, 125 * dt); p.x += dx / d * st; p.y += dy / d * st; }
+    let want;
+    if (d > 3) want = Math.atan2(dy, dx) * 180 / Math.PI;
+    else if (p.state === 'queue') want = S.queue.indexOf(p) >= 4 ? 270 : 180;
+    else if (p.state === 'chair') want = 270;
+    else want = p.ang;
+    const diff = ((want - p.ang + 540) % 360) - 180;
+    p.ang += diff * Math.min(1, dt * 9);
+  }
+
+  function applyAI(kind) {
+    const f = S.queue[0];
+    if (kind === 'ok' && f) {
+      say('b', pick(BAI_OK), 2.4); f.prog += 2; addFloat(f.x, f.y + 20, 'AI +2', '#5f3dc4'); tryComplete(f);
+    } else if (kind === 'bad' && f) {
+      say('b', pick(BAI_BAD), 2.4); f.pat = Math.max(0.5, f.pat - 1.5);
+    } else say('b', pick(BAI_MEH), 2.4);
+  }
+
+  function updateBorko(dt) {
+    const b = B;
+    const toward = (t, sp) => {
+      const dx = t[0] - b.x, dy = t[1] - b.y, d = Math.hypot(dx, dy);
+      if (d > 0.5) { const st = Math.min(d, sp * dt); b.x += dx / d * st; b.y += dy / d * st; b.ang = Math.atan2(dy, dx) * 180 / Math.PI; }
+      return d;
+    };
+    if (b.state === 'desk') {
+      b.ang += (((270 - b.ang + 540) % 360) - 180) * Math.min(1, dt * 8);
+      if (b.pending) {
+        b.pending.t -= dt;
+        if (b.pending.t <= 0) { applyAI(b.pending.kind); b.pending = null; b.aiT = rand(7, 11); }
+      } else {
+        b.aiT -= dt;
+        if (b.aiT <= 0) {
+          if (S.queue[0] && S.queue[0].dist < 40 && say('b', pick(BAI_START), 1.8)) b.pending = { t: 1.9, kind: pick(['ok', 'ok', 'ok', 'meh', 'bad']) };
+          else b.aiT = 1.5;
+        }
+        b.tripT -= dt;
+        if (b.tripT <= 0) { if (say('b', pick(BTRIP), 2)) b.state = 'toDoor'; else b.tripT = 1.5; }
+      }
+    } else if (b.state === 'toDoor') {
+      if (toward(BMAG, 130) < 1) { b.state = 'inside'; b.t = rand(2.5, 4); }
+    } else if (b.state === 'inside') {
+      b.t -= dt;
+      if (b.t <= 0) { b.state = 'back'; b.box = true; }
+    } else if (b.state === 'back') {
+      if (toward(BDESK, 130) < 1) {
+        b.state = 'desk'; b.box = false; b.tripT = rand(12, 18); b.aiT = rand(5, 8);
+        const f = S.queue[0];
+        if (Math.random() < 0.55 && f) { say('b', 'Evo ga, našao sam!', 2.2); f.prog += 3; addFloat(f.x, f.y + 20, 'magacin +3', '#5f3dc4'); tryComplete(f); }
+        else say('b', 'Nema ga u magacinu, naručiću.', 2.4);
+      }
+    }
+  }
+
+  function offerSpecial() {
+    const ids = Object.keys(SPECIALS).filter(k => SPECIALS[k].ok());
+    if (!ids.length) { S.spNext = 4; return; }
+    let tot = 0; ids.forEach(k => tot += SPECIALS[k].w);
+    let r = Math.random() * tot, id = ids[0];
+    for (const k of ids) { r -= SPECIALS[k].w; if (r <= 0) { id = k; break; } }
+    S.sp = { id, t: 9 };
+    el.l6.textContent = SPECIALS[id].label; el.b6.hidden = false;
+  }
+
+  function update(dt) {
+    if (S.phase !== 'play') return;
+    S.time += dt;
+    const level = Math.min(1 + S.time / 25, 9);
+
+    S.spawnT -= dt;
+    if (S.spawnT <= 0) { S.spawnT = Math.max(1.6, 5.2 - S.time * 0.04) * rand(0.8, 1.2); spawn(); }
+    S.waveT -= dt;
+    if (S.waveT <= 0) { S.waveT = rand(28, 40); S.pend.push(0.05, 0.7, 1.4); sayS('Jao, Klintone! Naviru!', 2.6); }
+    for (let i = S.pend.length - 1; i >= 0; i--) { S.pend[i] -= dt; if (S.pend[i] <= 0) { S.pend.splice(i, 1); spawn(); } }
+
+    if (S.eating > 0) {
+      S.eating -= dt;
+      if (S.eating <= 0) {
+        const f = S.eatFood;
+        S.energy = Math.min(100, S.energy + f.en);
+        sayS(S.queue.length >= 4 ? 'Jao, Klintone, pogledaj ovaj red!' : f.end, 2.4);
+        S.food = pickFood(S.food);
+      }
+    } else {
+      S.energy -= 1.15 * dt;
+      if (S.energy < 25 && Math.random() < dt * 0.15) sayS(pick(SHUNGRY), 2);
+    }
+    if (S.energy <= 0) { gameOver('Sreta je klonuo od gladi.'); return; }
+    S.stockT += dt;
+    if (S.stock < 3 && S.stockT >= 38) { S.stock++; S.stockT = 0; }
+
+    if (S.away > 0) {
+      S.away -= dt;
+      if (S.away <= 0) {
+        S.away = 0; S.freezeAll = 0;
+        const f = S.queue[0];
+        if (S.awayRes && f) { sayS('Našao sam, evo ga!', 2.4); f.prog += 3; addFloat(f.x, f.y + 20, 'magacin +3', '#f58220'); tryComplete(f); }
+        else { sayS('Nema ga ni u magacinu...', 2.4); for (const c of S.queue) c.pat = Math.max(0.5, c.pat - 1); }
+      }
+    }
+
+    S.cdFront = Math.max(0, S.cdFront - dt);
+    S.cdAll = Math.max(0, S.cdAll - dt);
+    S.freezeAll = Math.max(0, S.freezeAll - dt);
+    S.gCool = Math.max(0, S.gCool - dt);
+    S.tapT = Math.max(0, S.tapT - dt);
+
+    if (S.gTalk > 0) { S.gTalk -= dt; if (S.gTalk <= 0) S.gNext = rand(7, 13); }
+    else {
+      S.gNext -= dt;
+      if (S.gNext <= 0 && S.gCool <= 0) {
+        S.gTalk = 5; const g = pick(GLINES);
+        if (Array.isArray(g)) { sayG(g[0], 5); S.gFollow = g[1]; S.gFollowT = 2.4; } else sayG(g, 5);
+      } else if (S.gNext <= 0) S.gNext = 1;
+    }
+    if (S.gFollow) { S.gFollowT -= dt; if (S.gFollowT <= 0) { sayS(S.gFollow, 2.6); S.gFollow = null; } }
+
+    S.kNext -= dt;
+    if (S.kNext <= 0) { S.kNext = rand(6, 10); say('k', pick(KLINES), 2.8); }
+    S.sIdle -= dt;
+    if (S.sIdle <= 0) {
+      S.sIdle = rand(7, 11);
+      if (bt.s <= 0) sayS(pick(S.queue.length >= 6 ? SSTRESS : S.energy < 35 ? SHUNGRY : SIDLE), 2.6);
+    }
+    for (const w in bt) if (bt[w] > 0) { bt[w] -= dt; if (bt[w] <= 0) bub[w].hidden = true; }
+
+    if (S.sp) { S.sp.t -= dt; if (S.sp.t <= 0) { S.sp = null; el.b6.hidden = true; S.spNext = rand(18, 28); } }
+    else { S.spNext -= dt; if (S.spNext <= 0) offerSpecial(); }
+
+    for (let k = 0; k < 2; k++) {
+      const ch = S.chairs[k];
+      if (!ch) continue;
+      ch.t -= dt;
+      if (ch.t <= 0) { const c = ch.c; c.state = 'queue'; c.chair = -1; c.say = 'Sad je moj red!'; S.queue.unshift(c); S.chairs[k] = null; }
+    }
+
+    for (let i = S.queue.length - 1; i >= 0; i--) {
+      const c = S.queue[i];
+      let rate = i === 0 ? 1 : i < 3 ? 0.45 : 0.25;
+      rate *= 1 + (level - 1) * 0.05;
+      if (i === 0 && S.gTalk > 0 && !c.toner) rate *= 1.5;
+      if (i === 0 && S.eating > 0) rate *= 1.4;
+      if (c.freeze > 0) { c.freeze -= dt; rate = 0; }
+      if (S.freezeAll > 0) rate = 0;
+      c.pat -= dt * rate;
+      if (rate > 0 && c.pat / c.max < 0.5) { c.angerT -= dt; if (c.angerT <= 0) { shout(c, pick(ANGRY)); c.angerT = rand(6, 10); } }
+      if (c.pat <= 0) {
+        shout(c, pick(LEAVE));
+        finish(c, false); S.nerves--; S.streak = 0;
+        sayS(pick(['Jao, Klintone, otišao je ljut!', 'Još jedna loša ocena...']), 2.2);
+      }
+    }
+    if (S.nerves <= 0) { gameOver('Previše ljutih kupaca je otišlo.'); return; }
+
+    updateBorko(dt);
+    for (let i = S.people.length - 1; i >= 0; i--) {
+      const p = S.people[i];
+      movePerson(p, dt);
+      if (p.state === 'leave' && p.dist < 2) { S.people.splice(i, 1); const n = nodes.get(p.id); if (n) { n.g.remove(); nodes.delete(p.id); } }
+    }
+    for (let i = S.floats.length - 1; i >= 0; i--) {
+      const f = S.floats[i]; f.t += dt;
+      if (f.t >= f.life) { f.el.remove(); S.floats.splice(i, 1); }
+    }
+  }
+
+  function nodeFor(c) {
+    let n = nodes.get(c.id);
+    if (n) return n;
+    const g = document.createElementNS(NS, 'g');
+    g.innerHTML =
+      '<ellipse cx="0" cy="3" rx="12" ry="9" fill="rgba(0,0,0,.14)"/>' +
+      '<circle class="ring" r="16" fill="none" stroke="#1f5fd6" stroke-width="2" display="none"/>' +
+      '<g class="rot"><ellipse rx="6" ry="12" fill="' + c.shirt + '" stroke="rgba(0,0,0,.35)" stroke-width="1"/>' +
+      '<circle r="7" fill="' + c.hair + '"/><circle cx="1.8" r="6" fill="' + c.skin + '"/><circle cx="7.4" r="1.4" fill="rgba(0,0,0,.18)"/></g>' +
+      '<rect class="pb" x="-9" y="-20" width="18" height="3.6" rx="1.8" fill="#c3ccd8"/>' +
+      '<rect class="pf" x="-9" y="-20" width="18" height="3.6" rx="1.8" fill="#ffd43b"/>' +
+      '<g class="mark" display="none"><circle cx="0" cy="-27" r="6" fill="#d62d20"/><rect x="-1" y="-31" width="2" height="5" fill="#fff"/><circle cx="0" cy="-22.6" r="1.1" fill="#fff"/></g>';
+    el.gPeople.appendChild(g);
+    n = { g, rot: g.querySelector('.rot'), ring: g.querySelector('.ring'), pb: g.querySelector('.pb'), pf: g.querySelector('.pf'), mark: g.querySelector('.mark'), mk: false, rg: false };
+    nodes.set(c.id, n);
+    return n;
+  }
+
+  function drawNerves() {
+    el.nerves.innerHTML = '';
+    for (let i = 0; i < 5; i++) { const b = document.createElement('i'); if (i >= S.nerves) b.className = 'off'; el.nerves.appendChild(b); }
+    el.nerves.classList.toggle('low', S.nerves <= 2);
+  }
+
+  function render(now) {
+    if (shownNerves !== S.nerves) { drawNerves(); shownNerves = S.nerves; }
+    el.score.textContent = S.score;
+    el.energy.style.transform = 'scaleX(' + Math.max(0, S.energy / 100) + ')';
+    el.energy.style.background = S.energy < 25 ? 'var(--bad)' : 'var(--good)';
+
+    for (const p of S.people) {
+      const n = nodeFor(p);
+      n.g.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')');
+      n.rot.setAttribute('transform', 'rotate(' + p.ang.toFixed(0) + ')');
+      const inQ = p.state === 'queue', front = inQ && S.queue[0] === p;
+      const frozen = p.state === 'chair' || (inQ && (p.freeze > 0 || S.freezeAll > 0));
+      const ratio = Math.max(0, p.pat / p.max);
+      n.pf.setAttribute('width', (18 * ratio).toFixed(1));
+      n.pf.setAttribute('fill', frozen ? '#7aa6ff' : ratio < 0.3 ? '#d62d20' : '#ffd43b');
+      const showBar = p.state !== 'leave';
+      n.pb.setAttribute('display', showBar ? 'inline' : 'none'); n.pf.setAttribute('display', showBar ? 'inline' : 'none');
+      if (n.rg !== front) { n.ring.setAttribute('display', front ? 'inline' : 'none'); n.rg = front; }
+      const mk = p.state === 'leave' && p.angry;
+      if (n.mk !== mk) { n.mark.setAttribute('display', mk ? 'inline' : 'none'); n.mk = mk; }
+    }
+    for (const f of S.floats) {
+      let x = f.x, y;
+      if (f.follow) { x = f.follow.x; y = f.follow.y + 22 + f.t * 6; f.x = x; }
+      else y = f.y + f.t * 14;
+      x = Math.max(40, Math.min(262, x));
+      f.el.setAttribute('x', x.toFixed(1)); f.el.setAttribute('y', y.toFixed(1));
+      f.el.setAttribute('opacity', Math.min(1, (f.life - f.t) / 0.5).toFixed(2));
+    }
+
+    const lean = S.tapT > 0 ? 3 * (S.tapT / 0.12) : 0;
+    const bob = S.eating > 0 ? Math.sin(now / 110) * 1.4 : 0;
+    el.sretaG.setAttribute('transform', 'translate(' + (33 + lean).toFixed(1) + ' ' + (150 + bob).toFixed(1) + ')');
+    el.sretaG.setAttribute('opacity', S.away > 0 ? '0.25' : '1');
+    el.tin.setAttribute('display', S.eating > 0 ? 'inline' : 'none');
+    if (S.eatFood) el.tinFill.setAttribute('fill', S.eatFood.col);
+    if (S.gTalk > 0) {
+      const k = (now / 450) % 1;
+      el.gocaRing.setAttribute('r', (14 + k * 14).toFixed(1)); el.gocaRing.setAttribute('opacity', ((1 - k) * 0.8).toFixed(2));
+    } else el.gocaRing.setAttribute('opacity', '0');
+
+    el.borkoG.setAttribute('transform', 'translate(' + B.x.toFixed(1) + ' ' + B.y.toFixed(1) + ')');
+    el.borkoG.setAttribute('display', B.state === 'inside' ? 'none' : 'inline');
+    el.borkoRot.setAttribute('transform', 'rotate(' + B.ang.toFixed(0) + ')');
+    el.borkoBox.setAttribute('display', B.box ? 'inline' : 'none');
+    el.lapGlow.setAttribute('fill', B.state === 'desk' ? (Math.floor(now / 400) % 2 ? '#7ec8ff' : '#aee0ff') : '#3a4a5c');
+    el.knjigRot.setAttribute('transform', 'rotate(' + (180 + Math.sin(now / 170) * 7).toFixed(1) + ')');
+    papers.forEach((g, i) => {
+      const a = now / 700 + i * 1.6;
+      const x = 52 + (16 + 3 * Math.sin(now / 230 + i)) * Math.cos(a), y = 25 + (12 + 2 * Math.sin(now / 310 + i)) * Math.sin(a);
+      g.setAttribute('transform', 'translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ') rotate(' + (Math.sin(now / 260 + i) * 40).toFixed(0) + ')');
+    });
+
+    const chairsUsed = (S.chairs[0] ? 1 : 0) + (S.chairs[1] ? 1 : 0);
+    el.qInfo.textContent = 'Red ' + S.queue.length + ' / ' + MAXQ + ' · stolice ' + chairsUsed + ' / 2';
+    const f = S.queue[0];
+    if (f) {
+      el.cardFull.hidden = false; el.cNone.hidden = true;
+      el.cReq.textContent = f.req + (f.toner ? ' (toner)' : '');
+      el.cQuote.textContent = '„' + f.say + '“';
+      el.cPat.style.transform = 'scaleX(' + Math.max(0, f.pat / f.max) + ')';
+      el.cPat.style.background = f.pat / f.max < 0.3 ? 'var(--bad)' : (f.freeze > 0 || S.freezeAll > 0) ? '#7aa6ff' : 'var(--price)';
+      el.cProg.style.transform = 'scaleX(' + Math.min(1, f.prog / f.n) + ')';
+    } else { el.cardFull.hidden = true; el.cNone.hidden = false; }
+
+    const play = S.phase === 'play', ready = f && f.dist < 34;
+    el.b1.setAttribute('aria-disabled', String(!play || S.eating > 0 || S.away > 0 || !ready));
+    el.b2.setAttribute('aria-disabled', String(!play || S.cdFront > 0 || !f || freeChair() < 0));
+    el.b3.setAttribute('aria-disabled', String(!play || S.cdAll > 0 || !S.queue.length));
+    el.b4.setAttribute('aria-disabled', String(!play || S.eating > 0 || S.away > 0 || S.stock <= 0));
+    el.b5.setAttribute('aria-disabled', String(!play || S.gTalk <= 0 || S.gCool > 0));
+    const t2 = S.cdFront > 0 ? 'odmor ' + Math.ceil(S.cdFront) + 's' : freeChair() < 0 ? 'stolice su pune' : 'taster 2';
+    const t3 = S.cdAll > 0 ? 'odmor ' + Math.ceil(S.cdAll) + 's' : 'taster 3';
+    const t4 = S.eating > 0 ? 'jede...' : 'zalihe: ' + S.stock + ' (taster 4)';
+    const t5 = S.gCool > 0 ? 'odmor ' + Math.ceil(S.gCool) + 's' : S.gTalk > 0 ? 'Goca priča! (taster 5)' : 'taster 5';
+    if (el.c2.textContent !== t2) el.c2.textContent = t2;
+    if (el.c3.textContent !== t3) el.c3.textContent = t3;
+    if (el.c4.textContent !== t4) el.c4.textContent = t4;
+    if (el.c5.textContent !== t5) el.c5.textContent = t5;
+    const l4 = FOODS[S.food].btn; if (el.l4.textContent !== l4) el.l4.textContent = l4;
+    if (S.sp) { const t6 = 'ostalo ' + Math.ceil(S.sp.t) + 's (taster 6)'; if (el.c6.textContent !== t6) el.c6.textContent = t6; }
+  }
+
+  function start() { init('play'); el.overlay.hidden = true; el.ovLegend.hidden = false; el.b1.focus({ preventScroll: true }); }
+
+  el.start.addEventListener('click', start);
+  el.b1.addEventListener('click', serve);
+  el.b2.addEventListener('click', waitFront);
+  el.b3.addEventListener('click', waitAll);
+  el.b4.addEventListener('click', eat);
+  el.b5.addEventListener('click', silence);
+  el.b6.addEventListener('click', useSpecial);
+  el.gocaHit.addEventListener('click', silence);
+  addEventListener('keydown', ev => {
+    if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+    const k = ev.key.toLowerCase();
+    if (S.phase !== 'play') {
+      if ((k === 'enter' || k === ' ') && document.activeElement !== el.start) { ev.preventDefault(); start(); }
+      return;
+    }
+    if (k === ' ') { ev.preventDefault(); if (!ev.repeat) serve(); }
+    else if (k === '1') serve();
+    else if (k === '2') waitFront();
+    else if (k === '3') waitAll();
+    else if (k === '4') eat();
+    else if (k === '5' || k === 'g') silence();
+    else if (k === '6') useSpecial();
+  });
+
+  init('menu');
+  for (let i = 0; i < 4; i++) addCustomer(i);
+  S.queue[0].prog = 1.5;
+
+  function frame(now) {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    update(dt); render(now);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
